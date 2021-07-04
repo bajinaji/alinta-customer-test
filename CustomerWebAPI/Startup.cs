@@ -11,7 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AlintaTestModel.Models;
+using AlintaTestModels;
 using Microsoft.EntityFrameworkCore;
 
 namespace CustomerWebAPI
@@ -35,8 +35,8 @@ namespace CustomerWebAPI
 				c.SwaggerDoc("v1", new OpenApiInfo { Title = "CustomerWebAPI", Version = "v1" });
 			});
 
-            services.AddDbContext<AlintaTestContext>(opt => opt.UseSqlServer("AlintaTest"));
-		}
+            services.AddDbContext<AlintaTestContext>(opt => opt.UseInMemoryDatabase("AlintaTestDb"));
+        }
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
 		public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
