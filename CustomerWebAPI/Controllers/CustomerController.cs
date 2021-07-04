@@ -89,7 +89,6 @@ namespace CustomerWebAPI.Controllers
         }
 
         [HttpPost]
-        // New resource
         [ProducesResponseType(typeof(Customer), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult> Post(Customer customer)
@@ -99,7 +98,7 @@ namespace CustomerWebAPI.Controllers
                 return BadRequest();
             }
 
-            await _customerRepository.UpdateAsync(customer);
+            await _customerRepository.AddAsync(customer);
 
             return CreatedAtAction(nameof(GetById), new { id = customer.Id }, customer);
         }
