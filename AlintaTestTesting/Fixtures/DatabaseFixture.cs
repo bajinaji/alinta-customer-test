@@ -5,10 +5,11 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AlintaTestModels;
+using AlintaDomain;
+using AlintaEF;
 using Microsoft.EntityFrameworkCore;
 
-namespace AlintaTestTesting
+namespace AlintaDatabaseTesting
 {
     public class DatabaseFixture : IDatabaseFixture
     {
@@ -20,7 +21,7 @@ namespace AlintaTestTesting
             Seed();
         }
 
-        public virtual AlintaTestContext CreateContext(DbTransaction transaction = null)
+        public virtual AlintaEFContext CreateContext(DbTransaction transaction = null)
         {
             return null;
         }

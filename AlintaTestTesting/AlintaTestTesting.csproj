@@ -24,7 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\CustomerModel\AlintaTestModel.csproj" />
+    <ProjectReference Include="..\CustomerModel\AlintaEF.csproj" />
     <ProjectReference Include="..\CustomerWebAPI\CustomerWebAPI.csproj" />
   </ItemGroup>
 

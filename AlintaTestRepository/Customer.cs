@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace AlintaTestModels
+namespace AlintaDomain
 {
     public class Customer
     {

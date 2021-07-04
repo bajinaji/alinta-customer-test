@@ -5,14 +5,14 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AlintaTestModels;
+using AlintaEF;
 using Microsoft.EntityFrameworkCore;
 
-namespace AlintaTestTesting
+namespace AlintaDatabaseTesting
 {
     public class DatabaseInMemoryFixture : DatabaseFixture
     {
-        private readonly DbContextOptions<AlintaTestContext> _dbContextOptions = new DbContextOptionsBuilder<AlintaTestContext>()
+        private readonly DbContextOptions<AlintaEFContext> _dbContextOptions = new DbContextOptionsBuilder<AlintaEFContext>()
             .UseInMemoryDatabase(databaseName: "AlintaTestDb")
             .Options;
 
@@ -20,10 +20,10 @@ namespace AlintaTestTesting
         {
         }
 
-        public override AlintaTestContext CreateContext(DbTransaction transaction = null)
+        public override AlintaEFContext CreateContext(DbTransaction transaction = null)
         {
             var context =
-                new AlintaTestContext(_dbContextOptions);
+                new AlintaEFContext(_dbContextOptions);
 
 
             if (transaction != null)

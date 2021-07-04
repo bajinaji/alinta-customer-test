@@ -1,11 +1,12 @@
 using System;
 using System.Data.Common;
 using System.Linq;
-using AlintaTestModels;
 using Microsoft.Data.SqlClient;
 using Xunit;
+using AlintaDomain;
+using AlintaEF;
 
-namespace AlintaTestTesting
+namespace AlintaDatabaseTesting
 {
     public abstract class DatabaseTest
     {
@@ -55,7 +56,7 @@ namespace AlintaTestTesting
             using (var context = Fixture.CreateContext())
             {
                 var customer = context.Set<Customer>().First(e => e.Id == id);
-                Assert.True(customer.DateOfBirth == null);
+                Assert.Null(customer.DateOfBirth);
                 context.Customers.Remove(customer);
                 context.SaveChanges();
             }

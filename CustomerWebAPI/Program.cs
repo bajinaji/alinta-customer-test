@@ -6,7 +6,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AlintaTestModels;
+using AlintaDomain;
+using AlintaEF;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace CustomerWebAPI
@@ -21,7 +22,7 @@ namespace CustomerWebAPI
             {
                 var services = serviceScope.ServiceProvider;
 
-                using (var context = services.GetRequiredService<AlintaTestContext>())
+                using (var context = services.GetRequiredService<AlintaEFContext>())
                 {
                     context.Database.EnsureDeleted();
                     context.Database.EnsureCreated();

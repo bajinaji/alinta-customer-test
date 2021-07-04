@@ -4,12 +4,12 @@ using System.Data.Common;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AlintaTestModels;
+using AlintaEF;
 
-namespace AlintaTestTesting
+namespace AlintaDatabaseTesting
 {
     interface IDatabaseFixture
     {
-        AlintaTestContext CreateContext(DbTransaction transaction = null);
+        AlintaEFContext CreateContext(DbTransaction transaction = null);
     }
 }

@@ -5,10 +5,10 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AlintaTestModels;
+using AlintaEF;
 using Microsoft.EntityFrameworkCore;
 
-namespace AlintaTestTesting
+namespace AlintaDatabaseTesting
 {
     public class DatabaseSqlServerFixture : DatabaseFixture
     {
@@ -16,10 +16,10 @@ namespace AlintaTestTesting
         {
         }
 
-        public override AlintaTestContext CreateContext(DbTransaction transaction = null)
+        public override AlintaEFContext CreateContext(DbTransaction transaction = null)
         {
             var context =
-                new AlintaTestContext(new DbContextOptionsBuilder<AlintaTestContext>().UseSqlServer("Data Source=(local);Initial Catalog=AlintaTest;Trusted_Connection=True").Options);
+                new AlintaEFContext(new DbContextOptionsBuilder<AlintaEFContext>().UseSqlServer("Data Source=(local);Initial Catalog=AlintaTest;Trusted_Connection=True").Options);
 
 
             if (transaction != null)

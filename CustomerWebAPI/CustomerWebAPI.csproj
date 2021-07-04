@@ -16,7 +16,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\CustomerModel\AlintaTestModel.csproj" />
+    <ProjectReference Include="..\AlintaTestRepository\AlintaDomain.csproj" />
+    <ProjectReference Include="..\CustomerModel\AlintaEF.csproj" />
   </ItemGroup>
 
 </Project>

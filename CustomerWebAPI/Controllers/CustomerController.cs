@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
-using AlintaTestModels;
+using AlintaDomain;
 using Microsoft.AspNetCore.Http;
 
 namespace CustomerWebAPI.Controllers
@@ -15,27 +15,27 @@ namespace CustomerWebAPI.Controllers
 	public class CustomerController : ControllerBase
 	{
 		private readonly ILogger<CustomerController> _logger;
-        private readonly AlintaTestContext _context;
+        private readonly ICustomerRepository _customerRepository;
 
-		public CustomerController(ILogger<CustomerController> logger, AlintaTestContext context)
+		public CustomerController(ILogger<CustomerController> logger, ICustomerRepository customerRepository)
 		{
 			_logger = logger;
-            _context = context;
+            _customerRepository = customerRepository;
         }
 
 		[HttpGet("SearchFirstNameBeginsWith")]
-        public IEnumerable<Customer> SearchFirstNameBeginsWith(string beginsWith)
+        public async Task<IEnumerable<Customer>> SearchFirstNameBeginsWith(string beginsWith)
 		{
-            var customers = _context.Customers.Where(c => c.FirstName.StartsWith(beginsWith));
-			return customers.ToArray();
+            var customers = await _customerRepository.GetCustomerByFirstNameBeginsWith(beginsWith);
+			return customers;
 		}
 
         
         [HttpGet("SearchLastNameBeginsWith")]
-        public IEnumerable<Customer> SearchLastNameBeginsWith(string beginsWith)
+        public async Task<IEnumerable<Customer>> SearchLastNameBeginsWith(string beginsWith)
         {
-            var customers = _context.Customers.Where(c => c.LastName.StartsWith(beginsWith));
-            return customers.ToArray();
+            var customers = await _customerRepository.GetCustomerByLastNameBeginsWith(beginsWith);
+            return customers;
         }
 
         
@@ -44,14 +44,14 @@ namespace CustomerWebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(Customer), StatusCodes.Status200OK)]
         // how to return the appropriate object type as the status ok
-        public ActionResult<Customer> GetById(int id)
+        public async Task<ActionResult<Customer>> GetById(int id)
         {
             if (id == 0)
             {
                 return BadRequest();
             }
 
-            var customer = _context.Customers.Find(id);
+            var customer = await _customerRepository.Get(id);
 
             if (customer == null)
             {
@@ -66,23 +66,14 @@ namespace CustomerWebAPI.Controllers
         // Update record
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(Customer), StatusCodes.Status204NoContent)]
-        public ActionResult Put(Customer customer)
+        public async Task<ActionResult> Put(Customer customer)
         {
-            Customer saving;
             if (customer.Id == null || customer.Id == 0)
             {
                 return BadRequest();
             }
-            else
-            {
-                saving = new Customer();
-                _context.Customers.Add(saving);
-            }
 
-            saving.LastName = customer.LastName;
-            saving.FirstName = customer.FirstName;
-            saving.DateOfBirth = customer.DateOfBirth;
-            _context.SaveChanges();
+            await _customerRepository.UpdateAsync(customer);
 
             return NoContent();
         }
@@ -93,23 +84,16 @@ namespace CustomerWebAPI.Controllers
         // New resource
         [ProducesResponseType(typeof(Customer), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public ActionResult<Customer> Post(Customer customer)
+        public async Task<ActionResult<Customer>> Post(Customer customer)
         {
             if (customer.Id != null)
             {
                 return BadRequest();
             }
 
-            var saving = new Customer();
-            _context.Customers.Add(saving);
-            
+            await _customerRepository.AddAsync(customer);
 
-            saving.LastName = customer.LastName;
-            saving.FirstName = customer.FirstName;
-            saving.DateOfBirth = customer.DateOfBirth;
-            _context.SaveChanges();
-
-            return CreatedAtAction(nameof(GetById), new { id = saving.Id}, saving);
+            return CreatedAtAction(nameof(GetById), new { id = customer.Id}, customer);
         }
 
         
@@ -117,7 +101,6 @@ namespace CustomerWebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        // -- delete - what does it return?
         // validate data errors in regards to dates, etc -- .data annotations - data model validation
         // follow rest api, 
         public async Task<ActionResult<Customer>> Delete(int id)
@@ -127,15 +110,12 @@ namespace CustomerWebAPI.Controllers
                 return BadRequest();
             }
 
-            var customerToDelete = await _context.Customers.FindAsync(id);
+            var foundAndDeleted = await _customerRepository.DeleteAsync(id);
 
-            if (customerToDelete == null)
+            if (!foundAndDeleted)
             {
                 return NotFound();
             }
-
-            _context.Customers.Remove(customerToDelete);
-            await _context.SaveChangesAsync();
             return NoContent();
         }
     }

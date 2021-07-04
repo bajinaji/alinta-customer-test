@@ -1,10 +1,9 @@
 using System;
 using System.Linq;
-using AlintaTestModels;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Xunit;
 
-namespace AlintaTestTesting
+namespace AlintaDatabaseTesting
 {
     public class DatabaseInMemoryTest : DatabaseTest, IClassFixture<DatabaseInMemoryFixture>
     {

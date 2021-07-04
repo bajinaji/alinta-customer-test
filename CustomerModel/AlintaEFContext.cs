@@ -4,12 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using AlintaDomain;
 
-namespace AlintaTestModels
+namespace AlintaEF
 {
-    public class AlintaTestContext : DbContext
+    public class AlintaEFContext : DbContext
     {
-        public AlintaTestContext(DbContextOptions<AlintaTestContext> options)
+        public AlintaEFContext(DbContextOptions<AlintaEFContext> options)
             : base(options)
         {
         }
@@ -34,7 +35,6 @@ namespace AlintaTestModels
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-           // optionsBuilder.UseSqlServer(@"Data Source=(local);Initial Catalog=AlintaTest;Trusted_Connection=True");
         }
 
         public DbSet<Customer> Customers { get; set; }

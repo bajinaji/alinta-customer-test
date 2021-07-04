@@ -1,22 +1,45 @@
 using System;
 using System.Data.Common;
 using System.Linq;
-using AlintaTestModels;
+using AlintaDatabaseTesting;
+using AlintaDomain;
+using AlintaEF;
 using CustomerWebAPI.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 
-namespace AlintaTestTesting
+namespace AlintaControllerTesting
 {
-    public class ControllerTest:IClassFixture<DatabaseInMemoryFixture>
+    public class ControllerFixture
     {
-        public DatabaseInMemoryFixture Fixture { get; set; }
+        public ICustomerRepository Repository { get; set; }
 
-        public ControllerTest(DatabaseInMemoryFixture fixture)
+        ControllerFixture()
+        {
+            DbContextOptions<AlintaEFContext> dbContextOptions = new DbContextOptionsBuilder<AlintaEFContext>()
+                .UseInMemoryDatabase(databaseName: "AlintaTestDb")
+                .Options;
+            Repository = new CustomerRepositoryEF(new AlintaEFContext(dbContextOptions));
+        }
+    }
+
+    public class ControllerTest:IClassFixture<ControllerFixture>
+    {
+        public ControllerFixture Fixture { get; set; }
+        public ICustomerRepository Repository { get; set; }
+
+        public ControllerTest(ControllerFixture fixture)
         {
             Fixture = fixture;
+            Repository = fixture.Repository;
+        }
+
+        private CustomerController GetController()
+        {
+            return new CustomerController(new NullLogger<CustomerController>(), Repository);
         }
 
         [Theory]
@@ -25,8 +48,8 @@ namespace AlintaTestTesting
         [InlineData("zzzzz", 0)]
         public void SearchFirstName(string startsWith, int expectedResults)
         {
-            var c = new CustomerController(new NullLogger<CustomerController>(), Fixture.CreateContext());
-            var customers = c.SearchFirstNameBeginsWith(startsWith).ToArray();
+            var c = GetController();
+            var customers = c.SearchFirstNameBeginsWith(startsWith).Result.ToArray();
             Assert.Equal(expectedResults, customers.Count());
             Assert.True(customers.Count(n => n.FirstName.StartsWith(startsWith)) == expectedResults);
         }
@@ -34,22 +57,22 @@ namespace AlintaTestTesting
         [Fact]
         public void GetById()
         {
-            var cont = new CustomerController(new NullLogger<CustomerController>(), Fixture.CreateContext());
+            var cont = GetController();
             var call = cont.GetById(1);
 
-            var result = call.Result as OkObjectResult;
+            var result = call.Result.Result as OkObjectResult;
             Assert.NotNull(call.Result);
-            Assert.Equal(1, ((Customer)((OkObjectResult)call.Result).Value).Id);
+            Assert.Equal(1, ((Customer)((OkObjectResult)call.Result.Result).Value).Id);
 
             var c = cont.GetById(0);
-            Assert.True(c.Result is BadRequestResult);
+            Assert.True(c.Result.Result is BadRequestResult);
         }
 
         [Fact]
         public void PutExistingCustomer()
         {
-            var c = new CustomerController(new NullLogger<CustomerController>(), Fixture.CreateContext());
-            var customer = c.SearchLastNameBeginsWith("Last4").FirstOrDefault();
+            var c = GetController();
+            var customer = c.SearchLastNameBeginsWith("Last4").Result.FirstOrDefault();
             Assert.NotNull(customer);
             Assert.NotNull(customer.Id);
             var id = (int)customer.Id;
@@ -61,9 +84,9 @@ namespace AlintaTestTesting
             customer.LastName = "ModifiedLastName1";
 
 
-            c.Put(customer);
+            var r = c.Put(customer).Result;
 
-            customer = ((Customer) ((OkObjectResult) c.GetById(id).Result).Value);
+            customer = ((Customer) ((OkObjectResult) c.GetById(id).Result.Result).Value);
             Assert.NotNull(customer);
             Assert.NotNull(customer.DateOfBirth);
             Assert.Equal(dob, customer.DateOfBirth);
@@ -74,12 +97,13 @@ namespace AlintaTestTesting
         [Fact]
         public void PostNewCustomer()
         {
-            var c = new CustomerController(new NullLogger<CustomerController>(), Fixture.CreateContext());
+            var c = GetController();
+
             var dob = DateTime.Now.AddYears(-45);
             var customer = new Customer() {DateOfBirth = dob, LastName = "NewCustomerLastName1", FirstName = "NewCustomerFirstName1" };
             Assert.Null(customer.Id);
 
-            customer = ((Customer)((CreatedAtActionResult)c.Post(customer).Result).Value);
+            customer = ((Customer)((CreatedAtActionResult)c.Post(customer).Result.Result).Value);
 
             Assert.NotNull(customer);
             Assert.NotNull(customer.Id);
@@ -96,8 +120,9 @@ namespace AlintaTestTesting
         [InlineData("zzzzz", 0)]
         public void SearchLastName(string startsWith, int expectedResults)
         {
-            var c = new CustomerController(new NullLogger<CustomerController>(), Fixture.CreateContext());
-            var customers = c.SearchLastNameBeginsWith(startsWith).ToArray();
+            var c = GetController();
+
+            var customers = c.SearchLastNameBeginsWith(startsWith).Result.ToArray();
             Assert.Equal(expectedResults, customers.Count());
             Assert.True(customers.Count(n => n.LastName.StartsWith(startsWith)) == expectedResults);
         }
