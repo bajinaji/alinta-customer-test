@@ -37,8 +37,8 @@ namespace CustomerWebAPI.Controllers
             return customers.ToArray();
         }
 
-        /*
-        [HttpGet]
+        
+        [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public ActionResult<Customer> GetById(int id)
@@ -56,16 +56,21 @@ namespace CustomerWebAPI.Controllers
             }
 
             return customer;
-        }*/
+        }
 
-        /*
-        [HttpPost]
+        
+        [HttpPost("Post")]
         public ActionResult<Customer> Post(Customer customer)
         {
             Customer saving;
             if (customer.Id != null)
             {
                 saving = _context.Customers.Find(customer.Id);
+                if (saving == null)
+                {
+                    return NotFound();
+                }
+
             }
             else
             {
@@ -79,10 +84,10 @@ namespace CustomerWebAPI.Controllers
             _context.SaveChanges();
 
             return saving;
-        }*/
+        }
 
-        /*
-        [HttpDelete]
+        
+        [HttpDelete("Delete/{id}")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<Customer>> Delete(int id)
@@ -102,6 +107,6 @@ namespace CustomerWebAPI.Controllers
             _context.Customers.Remove(customerToDelete);
             await _context.SaveChangesAsync();
             return customerToDelete;
-        }*/
+        }
     }
 }
