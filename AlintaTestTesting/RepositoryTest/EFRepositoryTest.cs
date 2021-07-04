@@ -3,28 +3,25 @@ using System.Data.Common;
 using System.Linq;
 using AlintaDatabaseTesting;
 using AlintaDomain;
+using AlintaEF;
 using CustomerWebAPI.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 
 namespace AlintaControllerTesting
 {
-    public class ControllerTest:IClassFixture<ControllerFixture>
+    public class EFRepositoryTest:IClassFixture<TestEFRepositoryFixture>
     {
-        public ControllerFixture Fixture { get; set; }
+        public TestEFRepositoryFixture Fixture { get; set; }
         public ICustomerRepository Repository { get; set; }
 
-        public ControllerTest(ControllerFixture fixture)
+        public EFRepositoryTest(TestEFRepositoryFixture fixture)
         {
             Fixture = fixture;
             Repository = fixture.Repository;
-        }
-
-        private CustomerController GetController()
-        {
-            return new CustomerController(new NullLogger<CustomerController>(), Repository);
         }
 
         [Theory]
@@ -33,8 +30,7 @@ namespace AlintaControllerTesting
         [InlineData("zzzzz", 0)]
         public void SearchFirstName(string startsWith, int expectedResults)
         {
-            var c = GetController();
-            var customers = c.SearchFirstNameBeginsWith(startsWith).Result.ToArray();
+            var customers = Repository.GetCustomerByFirstNameBeginsWith(startsWith).Result.ToArray();
             Assert.True(expectedResults == customers.Count());
             Assert.True(customers.Count(n => n.FirstName.StartsWith(startsWith)) == expectedResults);
         }
@@ -42,22 +38,18 @@ namespace AlintaControllerTesting
         [Fact]
         public void GetById()
         {
-            var cont = GetController();
-            var call = cont.GetById(1).Result;
+            var customer = Repository.Get(1).Result;
+            Assert.NotNull(customer);
+            Assert.Equal(1, customer.Id);
 
-            var result = call.Result as OkObjectResult;
-            Assert.NotNull(result);
-            Assert.Equal(1, ((Customer)(result.Value)).Id);
-
-            var c = cont.GetById(0).Result;
-            Assert.True(c.Result is BadRequestResult);
+            var c = Repository.Get(0).Result;
+            Assert.Null(c);
         }
 
         [Fact]
         public void PutExistingCustomer()
         {
-            var c = GetController();
-            var customer = c.SearchLastNameBeginsWith("Clayton99").Result.FirstOrDefault();
+            var customer = Repository.GetCustomerByLastNameBeginsWith("Clayton99").Result.FirstOrDefault();
             Assert.NotNull(customer);
             Assert.NotNull(customer.Id);
             var id = (int)customer.Id;
@@ -69,9 +61,9 @@ namespace AlintaControllerTesting
             customer.LastName = "ModifiedLastName1";
 
 
-            var r = c.Put(customer).Result;
+            var r = Repository.UpdateAsync((customer)).Result;
 
-            customer = ((Customer) ((OkObjectResult) c.GetById(id).Result.Result).Value);
+            customer = Repository.Get(id).Result;
             Assert.NotNull(customer);
             Assert.NotNull(customer.DateOfBirth);
             Assert.Equal(dob, customer.DateOfBirth);
@@ -82,13 +74,11 @@ namespace AlintaControllerTesting
         [Fact]
         public void PostNewValidCustomer()
         {
-            var c = GetController();
-
             var dob = DateTime.Now.AddYears(-45);
             var customer = new Customer() {DateOfBirth = dob, LastName = "NewCustomerLastName1", FirstName = "NewCustomerFirstName1" };
             Assert.Null(customer.Id);
 
-            customer = ((Customer)((CreatedAtActionResult)c.Post(customer).Result).Value);
+            customer = Repository.AddAsync(customer).Result;
 
             Assert.NotNull(customer);
             Assert.NotNull(customer.Id);
@@ -104,9 +94,7 @@ namespace AlintaControllerTesting
         [InlineData("zzzzz", 0)]
         public void SearchLastName(string startsWith, int expectedResults)
         {
-            var c = GetController();
-
-            var customers = c.SearchLastNameBeginsWith(startsWith).Result.ToArray();
+            var customers = Repository.GetCustomerByLastNameBeginsWith(startsWith).Result.ToArray();
             Assert.True(expectedResults == customers.Count());
             Assert.True(customers.Count(n => n.LastName.StartsWith(startsWith)) == expectedResults);
         }

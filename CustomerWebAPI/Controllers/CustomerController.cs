@@ -27,6 +27,10 @@ namespace CustomerWebAPI.Controllers
         [ProducesResponseType(typeof(IEnumerable<Customer>), StatusCodes.Status200OK)]
         public async Task<IEnumerable<Customer>> SearchFirstNameBeginsWith(string beginsWith)
 		{
+            if (string.IsNullOrEmpty(beginsWith))
+            {
+                return new List<Customer>();
+            }
             var customers = await _customerRepository.GetCustomerByFirstNameBeginsWith(beginsWith);
 			return customers;
 		}
@@ -36,6 +40,10 @@ namespace CustomerWebAPI.Controllers
         [ProducesResponseType(typeof(IEnumerable<Customer>), StatusCodes.Status200OK)]
         public async Task<IEnumerable<Customer>> SearchLastNameBeginsWith(string beginsWith)
         {
+            if (string.IsNullOrEmpty(beginsWith))
+            {
+                return new List<Customer>();
+            }
             var customers = await _customerRepository.GetCustomerByLastNameBeginsWith(beginsWith);
             return customers;
         }
@@ -79,13 +87,27 @@ namespace CustomerWebAPI.Controllers
 
             return NoContent();
         }
-        
+
+        [HttpPost]
+        // New resource
+        [ProducesResponseType(typeof(Customer), StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult> Post(Customer customer)
+        {
+            if (customer.Id != null)
+            {
+                return BadRequest();
+            }
+
+            await _customerRepository.UpdateAsync(customer);
+
+            return CreatedAtAction(nameof(GetById), new { id = customer.Id }, customer);
+        }
+
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        // validate data errors in regards to dates, etc -- .data annotations - data model validation
-        // follow rest api, 
         public async Task<ActionResult> Delete(int id)
         {
             if (id == 0)
