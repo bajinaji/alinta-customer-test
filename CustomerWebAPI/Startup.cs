@@ -30,6 +30,13 @@ namespace CustomerWebAPI
 		{
 
 			services.AddControllers();
+            services.AddApiVersioning(x =>
+            {
+                x.DefaultApiVersion = new ApiVersion(1, 0);
+                x.AssumeDefaultVersionWhenUnspecified = true;
+                x.ReportApiVersions = true;
+            });
+
 			services.AddSwaggerGen(c =>
 			{
 				c.SwaggerDoc("v1", new OpenApiInfo { Title = "CustomerWebAPI", Version = "v1" });

@@ -6,7 +6,7 @@ using Xunit;
 
 namespace AlintaTestTesting
 {
-    public class DatabaseSqlServerTest : DatabaseTest, IClassFixture<DatabaseSqlServerFixture>
+    public abstract class DatabaseSqlServerTest : DatabaseTest, IClassFixture<DatabaseSqlServerFixture>
     {
         public DatabaseSqlServerTest(DatabaseSqlServerFixture fixture) : base(fixture)
         {

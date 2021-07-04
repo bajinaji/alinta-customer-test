@@ -38,15 +38,15 @@ namespace AlintaTestTesting
             var call = cont.GetById(1);
 
             var result = call.Result as OkObjectResult;
-            Assert.NotNull(call.Value);
-            Assert.Equal(1, call.Value.Id);
+            Assert.NotNull(call.Result);
+            Assert.Equal(1, ((Customer)((OkObjectResult)call.Result).Value).Id);
 
             var c = cont.GetById(0);
             Assert.True(c.Result is BadRequestResult);
         }
 
         [Fact]
-        public void PostExistingCustomer()
+        public void PutExistingCustomer()
         {
             var c = new CustomerController(new NullLogger<CustomerController>(), Fixture.CreateContext());
             var customer = c.SearchLastNameBeginsWith("Last4").FirstOrDefault();
@@ -61,9 +61,9 @@ namespace AlintaTestTesting
             customer.LastName = "ModifiedLastName1";
 
 
-            c.Post(customer);
+            c.Put(customer);
 
-            customer = c.GetById(id).Value;
+            customer = ((Customer) ((OkObjectResult) c.GetById(id).Result).Value);
             Assert.NotNull(customer);
             Assert.NotNull(customer.DateOfBirth);
             Assert.Equal(dob, customer.DateOfBirth);
@@ -79,7 +79,7 @@ namespace AlintaTestTesting
             var customer = new Customer() {DateOfBirth = dob, LastName = "NewCustomerLastName1", FirstName = "NewCustomerFirstName1" };
             Assert.Null(customer.Id);
 
-            customer = c.Post(customer).Value;
+            customer = ((Customer)((CreatedAtActionResult)c.Post(customer).Result).Value);
 
             Assert.NotNull(customer);
             Assert.NotNull(customer.Id);
