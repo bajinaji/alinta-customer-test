@@ -43,7 +43,7 @@ namespace CustomerWebAPI
 				c.SwaggerDoc("v1", new OpenApiInfo { Title = "CustomerWebAPI", Version = "v1" });
 			});
 
-            services.AddDbContext<AlintaEFContext>(opt => opt.UseInMemoryDatabase("AlintaTestDb"));
+            services.AddDbContext<AlintaEFContext>(opt => opt.UseInMemoryDatabase("AlintaWebAPIDb"));
 
             services.AddTransient<ICustomerRepository, CustomerRepositoryEF>();
 		}
