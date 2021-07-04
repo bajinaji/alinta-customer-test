@@ -139,7 +139,7 @@ namespace AlintaControllerTesting
         }
 
         [Fact]
-        public void PostNewCustomer()
+        public void PostNewValidCustomer()
         {
             var c = GetController();
 
@@ -155,6 +155,21 @@ namespace AlintaControllerTesting
             Assert.Equal(dob, customer.DateOfBirth);
             Assert.Equal("NewCustomerFirstName1", customer.FirstName);
             Assert.Equal("NewCustomerLastName1", customer.LastName);
+        }
+
+        [Fact]
+        public void PostNewInvalidCustomer()
+        {
+            var c = GetController();
+
+            var dob = DateTime.Now.AddYears(45);
+            var customer = new Customer() { DateOfBirth = dob, LastName = "NewCustomerLastName1", FirstName = "" };
+
+            c.ModelState.AddModelError("FirstName", "Required");
+
+            var result = c.Post(customer).Result;
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            Assert.IsType<SerializableError>(badRequestResult.Value);
         }
 
 

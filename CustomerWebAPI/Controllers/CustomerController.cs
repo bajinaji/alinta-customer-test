@@ -24,6 +24,7 @@ namespace CustomerWebAPI.Controllers
         }
 
 		[HttpGet("SearchFirstNameBeginsWith")]
+        [ProducesResponseType(typeof(IEnumerable<Customer>), StatusCodes.Status200OK)]
         public async Task<IEnumerable<Customer>> SearchFirstNameBeginsWith(string beginsWith)
 		{
             var customers = await _customerRepository.GetCustomerByFirstNameBeginsWith(beginsWith);
@@ -32,6 +33,7 @@ namespace CustomerWebAPI.Controllers
 
         
         [HttpGet("SearchLastNameBeginsWith")]
+        [ProducesResponseType(typeof(IEnumerable<Customer>), StatusCodes.Status200OK)]
         public async Task<IEnumerable<Customer>> SearchLastNameBeginsWith(string beginsWith)
         {
             var customers = await _customerRepository.GetCustomerByLastNameBeginsWith(beginsWith);
@@ -77,25 +79,6 @@ namespace CustomerWebAPI.Controllers
 
             return NoContent();
         }
-
-
-
-        [HttpPost]
-        // New resource
-        [ProducesResponseType(typeof(Customer), StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<Customer>> Post(Customer customer)
-        {
-            if (customer.Id != null)
-            {
-                return BadRequest();
-            }
-
-            await _customerRepository.AddAsync(customer);
-
-            return CreatedAtAction(nameof(GetById), new { id = customer.Id}, customer);
-        }
-
         
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -103,7 +86,7 @@ namespace CustomerWebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         // validate data errors in regards to dates, etc -- .data annotations - data model validation
         // follow rest api, 
-        public async Task<ActionResult<Customer>> Delete(int id)
+        public async Task<ActionResult> Delete(int id)
         {
             if (id == 0)
             {
